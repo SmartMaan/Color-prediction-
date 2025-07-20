@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyLoan - Loan Application System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 450px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .nav-container {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 0;
+        }
+
+        .nav-tabs {
+            display: flex;
+            list-style: none;
+            margin: 0;
+        }
+
+        .nav-tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px 10px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: #fff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .card-header {
+            background: #e9ecef;
+            margin: -20px -20px 15px -20px;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loan-calculator {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .calc-result {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .calc-result h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .amount-display {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #28a745;
+        }
+
+        .user-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .logout-btn {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+        }
+
+        .loan-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .loan-item h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .loan-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                margin: 0;
+                max-width: 100%;
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>EasyLoan</h1>
+            <p>Quick & Secure Loan Application</p>
+            <button id="logoutBtn" class="logout-btn hidden" onclick="signOut()">Logout</button>
+        </div>
+
+        <!-- Authentication Section -->
+        <div id="authSection">
+            <div class="content">
+                <div class="card">
+                    <div class="card-header">Welcome to EasyLoan</div>
+                    <p>Sign in to apply for loans, track applications, and manage your account.</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="authEmail" class="form-input" placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="authPassword" class="form-input" placeholder="Enter your password">
+                </div>
+
+                <button class="btn btn-primary" onclick="signIn()">Sign In</button>
+                <button class="btn btn-success" onclick="signUp()">Create Account</button>
+
+                <div id="authMessage"></div>
+            </div>
+        </div>
+
+        <!-- Main App Section -->
+        <div id="mainApp" class="hidden">
+            <!-- Navigation -->
+            <div class="nav-container">
+                <div class="nav-tabs">
+                    <button class="nav-tab active" onclick="showSection('apply')">Apply</button>
+                    <button class="nav-tab" onclick="showSection('calculator')">Calculator</button>
+                    <button class="nav-tab" onclick="showSection('status')">My Loans</button>
+                    <button class="nav-tab" onclick="showSection('profile')">Profile</button>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- User Info -->
+                <div class="user-info">
+                    <h3>Welcome, <span id="userEmail"></span>!</h3>
+                </div>
+
+                <!-- Apply Section -->
+                <div id="applySection" class="section active">
+                    <h2>Loan Application</h2>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Loan Type</label>
+                        <select id="loanType" class="form-select">
+                            <option value="">Select Loan Type</option>
+                            <option value="personal">Personal Loan</option>
+                            <option value="home">Home Loan</option>
+                            <option value="car">Car Loan</option>
+                            <option value="business">Business Loan</option>
+                            <option value="education">Education Loan</option>
+                        </select>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Loan Amount ($)</label>
+                            <input type="number" id="loanAmount" class="form-input" placeholder="50000" min="1000" max="1000000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tenure (Months)</label>
+                            <input type="number" id="loanTenure" class="form-input" placeholder="60" min="6" max="360">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="fullName" class="form-input" placeholder="Enter your full name">
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" id="phoneNumber" class="form-input" placeholder="+1234567890">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Address</label>
+                        <input type="text" id="address" class="form-input" placeholder="Enter your complete address">
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Monthly Income ($)</label>
+                            <input type="number" id="monthlyIncome" class="form-input" placeholder="5000" min="1000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Employment Type</label>
+                            <select id="employmentType" class="form-select">
+                                <option value="">Select Employment</option>
+                                <option value="salaried">Salaried</option>
+                                <option value="self-employed">Self Employed</option>
+                                <option value="business">Business Owner</option>
+                                <option value="freelancer">Freelancer</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Purpose of Loan</label>
+                        <input type="text" id="loanPurpose" class="form-input" placeholder="Describe the purpose of loan">
+                    </div>
+
+                    <button class="btn btn-success" onclick="submitLoanApplication()">Submit Application</button>
+                    
+                    <div id="applicationMessage"></div>
+                </div>
+
+                <!-- Calculator Section -->
+                <div id="calculatorSection" class="section">
+                    <h2>Loan Calculator</h2>
+                    
+                    <div class="loan-calculator">
+                        <div class="form-group">
+                            <label class="form-label">Principal Amount ($)</label>
+                            <input type="number" id="calcAmount" class="form-input" placeholder="50000" min="1000" oninput="calculateLoan()">
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Interest Rate (%)</label>
+                                <input type="number" id="calcRate" class="form-input" placeholder="8.5" step="0.1" min="1" max="30" oninput="calculateLoan()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Tenure (Years)</label>
+                                <input type="number" id="calcTenure" class="form-input" placeholder="5" min="1" max="30" oninput="calculateLoan()">
+                            </div>
+                        </div>
+
+                        <div class="calc-result">
+                            <h3>Monthly EMI</h3>
+                            <div class="amount-display" id="emiAmount">$0</div>
+                            <p><strong>Total Amount:</strong> <span id="totalAmount">$0</span></p>
+                            <p><strong>Total Interest:</strong> <span id="totalInterest">$0</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Section -->
+                <div id="statusSection" class="section">
+                    <h2>My Loan Applications</h2>
+                    
+                    <div id="loansContainer">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading your applications...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Section -->
+                <div id="profileSection" class="section">
+                    <h2>Profile Settings</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">Account Information</div>
+                        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+                        <p><strong>Member Since:</strong> <span id="memberSince"></span></p>
+                        <p><strong>Account Status:</strong> <span class="status-badge status-approved">Active</span></p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">Quick Actions</div>
+                        <button class="btn btn-primary" onclick="showSection('apply')">Apply for New Loan</button>
+                        <button class="btn btn-danger" onclick="signOut()">Sign Out</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAL5e-5eQfgf1nI6hWTnhwLFgK0Cp89aa0",
+            authDomain: "aviator-pr01.firebaseapp.com",
+            databaseURL: "https://aviator-pr01-default-rtdb.firebaseio.com",
+            projectId: "aviator-pr01",
+            storageBucket: "aviator-pr01.firebasestorage.app",
+            messagingSenderId: "290788041297",
+            appId: "1:290788041297:web:168f99d1532997fb778e70",
+            measurementId: "G-ENCBTT4BL8"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        let currentUser = null;
+
+        // Authentication state listener
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                currentUser = user;
+                showMainApp(user);
+                loadUserLoans();
+            } else {
+                currentUser = null;
+                showAuthSection();
+            }
+        });
+
+        function showAuthSection() {
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+        }
+
+        function showMainApp(user) {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('profileEmail').textContent = user.email;
+            document.getElementById('memberSince').textContent = new Date(user.metadata.creationTime).toLocaleDateString();
+        }
+
+        function signIn() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+
+            if (!email || !password) {
+                showMessage('authMessage', 'Please enter both email and password', 'danger');
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    showMessage('authMessage', 'Successfully signed in!', 'success');
+                })
+                .catch((error) => {
+                    showMessage('authMessage', 'Error: ' + error.message, 'danger');
+                });
+        }
+
+        function signUp() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+
+            if (!email || !password) {
+                showMessage('authMessage', 'Please enter both email and password', 'danger');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('authMessage', 'Password should be at least 6 characters', 'danger');
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    showMessage('authMessage', 'Account created successfully!', 'success');
+                })
+                .catch((error) => {
+                    showMessage('authMessage', 'Error: ' + error.message, 'danger');
+                });
+        }
+
+        function signOut() {
+            auth.signOut().then(() => {
+                console.log('User signed out');
+            }).catch((error) => {
+                console.error('Sign out error:', error);
+            });
+        }
+
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(sectionName + 'Section').classList.add('active');
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+
+            // Load data if needed
+            if (sectionName === 'status') {
+                loadUserLoans();
+            }
+        }
+
+        function submitLoanApplication() {
+            if (!currentUser) {
+                showMessage('applicationMessage', 'Please sign in first', 'danger');
+                return;
+            }
+
+            // Get form data
+            const applicationData = {
+                loanType: document.getElementById('loanType').value,
+                loanAmount: parseFloat(document.getElementById('loanAmount').value),
+                loanTenure: parseInt(document.getElementById('loanTenure').value),
+                fullName: document.getElementById('fullName').value,
+                phoneNumber: document.getElementById('phoneNumber').value,
+                dateOfBirth: document.getElementById('dateOfBirth').value,
+                address: document.getElementById('address').value,
+                monthlyIncome: parseFloat(document.getElementById('monthlyIncome').value),
+                employmentType: document.getElementById('employmentType').value,
+                loanPurpose: document.getElementById('loanPurpose').value,
+                userId: currentUser.uid,
+                userEmail: currentUser.email,
+                applicationDate: firebase.database.ServerValue.TIMESTAMP,
+                status: 'pending',
+                applicationId: 'LOAN' + Date.now()
+            };
+
+            // Validate required fields
+            const requiredFields = ['loanType', 'loanAmount', 'loanTenure', 'fullName', 'phoneNumber', 'monthlyIncome', 'employmentType'];
+            for (let field of requiredFields) {
+                if (!applicationData[field]) {
+                    showMessage('applicationMessage', 'Please fill all required fields', 'danger');
+                    return;
+                }
+            }
+
+            // Validate loan amount and income
+            if (applicationData.loanAmount < 1000) {
+                showMessage('applicationMessage', 'Minimum loan amount is $1,000', 'danger');
+                return;
+            }
+
+            if (applicationData.monthlyIncome < 1000) {
+                showMessage('applicationMessage', 'Minimum monthly income should be $1,000', 'danger');
+                return;
+            }
+
+            // Calculate EMI and debt-to-income ratio
+            const monthlyEMI = calculateEMI(applicationData.loanAmount, 8.5, applicationData.loanTenure);
+            const debtToIncomeRatio = (monthlyEMI / applicationData.monthlyIncome) * 100;
+
+            applicationData.monthlyEMI = monthlyEMI;
+            applicationData.debtToIncomeRatio = debtToIncomeRatio;
+
+            // Auto-approve or reject based on criteria
+            if (debtToIncomeRatio <= 40 && applicationData.monthlyIncome >= applicationData.loanAmount * 0.02) {
+                applicationData.status = 'approved';
+                applicationData.approvalDate = firebase.database.ServerValue.TIMESTAMP;
+            } else if (debtToIncomeRatio > 60) {
+                applicationData.status = 'rejected';
+                applicationData.rejectionReason = 'High debt-to-income ratio';
+            }
+
+            // Save to Firebase
+            database.ref('loan_applications').push(applicationData)
+                .then(() => {
+                    showMessage('applicationMessage', 'Application submitted successfully! Application ID: ' + applicationData.applicationId, 'success');
+                    clearApplicationForm();
+                    
+                    // Show appropriate message based on status
+                    setTimeout(() => {
+                        if (applicationData.status === 'approved') {
+                            showMessage('applicationMessage', 'Great news! Your loan has been pre-approved!', 'success');
+                        } else if (applicationData.status === 'rejected') {
+                            showMessage('applicationMessage', 'Unfortunately, your application doesn\'t meet our current criteria. Please try with different parameters.', 'info');
+                        }
+                    }, 2000);
+                })
+                .catch((error) => {
+                    console.error('Error saving application:', error);
+                    showMessage('applicationMessage', 'Error submitting application: ' + error.message, 'danger');
+                });
+        }
+
+        function clearApplicationForm() {
+            const fields = ['loanType', 'loanAmount', 'loanTenure', 'fullName', 'phoneNumber', 'dateOfBirth', 'address', 'monthlyIncome', 'employmentType', 'loanPurpose'];
+            fields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) {
+                    element.value = '';
+                }
+            });
+        }
+
+        function calculateLoan() {
+            const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
+            const rate = parseFloat(document.getElementById('calcRate').value) || 0;
+            const tenure = parseFloat(document.getElementById('calcTenure').value) || 0;
+
+            if (amount > 0 && rate > 0 && tenure > 0) {
+                const monthlyRate = rate / (12 * 100);
+                const numPayments = tenure * 12;
+                
+                const emi = (amount * monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
+                           (Math.pow(1 + monthlyRate, numPayments) - 1);
+                
+                const totalAmount = emi * numPayments;
+                const totalInterest = totalAmount - amount;
+
+                document.getElementById('emiAmount').textContent = '$' + emi.toFixed(2);
+                document.getElementById('totalAmount').textContent = '$' + totalAmount.toFixed(2);
+                document.getElementById('totalInterest').textContent = '$' + totalInterest.toFixed(2);
+            } else {
+                document.getElementById('emiAmount').textContent = '$0';
+                document.getElementById('totalAmount').textContent = '$0';
+                document.getElementById('totalInterest').textContent = '$0';
+            }
+        }
+
+        function calculateEMI(principal, rate, tenure) {
+            const monthlyRate = rate / (12 * 100);
+            const numPayments = tenure;
+            
+            const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
+                       (Math.pow(1 + monthlyRate, numPayments) - 1);
+            
+            return emi;
+        }
+
+        function loadUserLoans() {
+            if (!currentUser) return;
+
+            const loansContainer = document.getElementById('loansContainer');
+            loansContainer.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading your applications...</p></div>';
+
+            database.ref('loan_applications').orderByChild('userId').equalTo(currentUser.uid)
+                .once('value')
+                .then((snapshot) => {
+                    const loans = snapshot.val();
+                    loansContainer.innerHTML = '';
+
+                    if (!loans) {
+                        loansContainer.innerHTML = '<div class="alert alert-info">No loan applications found. <a href="#" onclick="showSection(\'apply\')">Apply for your first loan</a></div>';
+                        return;
+                    }
+
+                    Object.keys(loans).forEach((key) => {
+                        const loan = loans[key];
+                        const loanElement = createLoanElement(loan);
+                        loansContainer.appendChild(loanElement);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error loading loans:', error);
+                    loansContainer.innerHTML = '<div class="alert alert-danger">Error loading applications. Please try again.</div>';
+                });
+        }
+
+        function createLoanElement(loan) {
+            const div = document.createElement('div');
+            div.className = 'loan-item';
+            
+            const statusClass = loan.status === 'approved' ? 'status-approved' : 
+                               loan.status === 'rejected' ? 'status-rejected' : 'status-pending';
+            
+            div.innerHTML = `
+                <h4>${loan.loanType.charAt(0).toUpperCase() + loan.loanType.slice(1)} Loan</h4>
+                <div class="loan-details">
+                    <div><strong>Amount:</strong> $${loan.loanAmount.toLocaleString()}</div>
+                    <div><strong>Status:</strong> <span class="status-badge ${statusClass}">${loan.status}</span></div>
+                    <div><strong>Application ID:</strong> ${loan.applicationId}</div>
+                    <div><strong>Applied:</strong> ${new Date(loan.applicationDate).toLocaleDateString()}</div>
+                    <div><strong>Tenure:</strong> ${loan.loanTenure} months</div>
+                    <div><strong>Monthly EMI:</strong> $${loan.monthlyEMI ? loan.monthlyEMI.toFixed(2) : 'TBD'}</div>
+                </div>
+                ${loan.status === 'rejected' && loan.rejectionReason ? 
+                    `<div class="alert alert-danger" style="margin-top: 10px; font-size: 0.9rem;">Reason: ${loan.rejectionReason}</div>` : ''}
+                ${loan.status === 'approved' ? 
+                    `<div class="alert alert-success" style="margin-top: 10px; font-size: 0.9rem;">Congratulations! Your loan has been approved.</div>` : ''}
+            `;
+            
+            return div;
+        }
+
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                element.innerHTML = '';
+            }, 5000);
+        }
+
+        // Initialize calculator with default values
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('calcAmount').value = 50000;
+            document.getElementById('calcRate').value = 8.5;
+            document.getElementById('calcTenure').value = 5;
+            calculateLoan();
+        });
+    </script>
+</body>
+</html>
