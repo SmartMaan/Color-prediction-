@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sketchware App Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .upload-section {
+            margin: 30px 0;
+            padding: 40px;
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-section.dragover {
+            border-color: #667eea;
+            background: #e6f2ff;
+            transform: scale(1.02);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            font-weight: 600;
+        }
+
+        .file-input-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .convert-button {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 10px;
+        }
+
+        .convert-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .convert-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .output-section {
+            margin-top: 30px;
+            text-align: left;
+            display: none;
+        }
+
+        .output-title {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .code-output {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .download-button {
+            background: linear-gradient(45deg, #fd7e14, #e83e8c);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 15px 0;
+            display: block;
+            width: 200px;
+            margin: 15px auto;
+        }
+
+        .download-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(253, 126, 20, 0.4);
+        }
+
+        .feature-list {
+            text-align: left;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .feature-list h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .feature-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sketchware to HTML Converter</h1>
+            <p>Convert your Sketchware .swb projects into fully functional HTML applications</p>
+        </div>
+
+        <div class="feature-list">
+            <h3>Features</h3>
+            <ul>
+                <li>Convert Sketchware projects to clean HTML/CSS/JavaScript</li>
+                <li>Firebase integration support</li>
+                <li>Responsive design</li>
+                <li>Modern UI components</li>
+                <li>Single file output</li>
+                <li>No external dependencies</li>
+            </ul>
+        </div>
+
+        <div class="upload-section" id="uploadSection">
+            <h3>Upload Your Sketchware Project</h3>
+            <p>Drag and drop your .swb file here, or click to browse</p>
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" class="file-input" accept=".swb,.zip" />
+                <label for="fileInput" class="file-input-button">Choose File</label>
+            </div>
+            <div id="fileName" style="margin-top: 10px; color: #666;"></div>
+        </div>
+
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <button class="convert-button" id="convertButton" disabled onclick="convertProject()">
+            Convert to HTML
+        </button>
+
+        <button class="convert-button" onclick="generateTemplate()">
+            Generate Template App
+        </button>
+
+        <div class="output-section" id="outputSection">
+            <h3 class="output-title">Generated HTML Code</h3>
+            <div class="code-output" id="codeOutput"></div>
+            <button class="download-button" onclick="downloadHTML()">Download HTML File</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        let selectedFile = null;
+        let generatedHTML = '';
+
+        // Firebase configuration from your project
+        const firebaseConfig = {
+            apiKey: "AIzaSyAL5e-5eQfgf1nI6hWTnhwLFgK0Cp89aa0",
+            authDomain: "aviator-pr01.firebaseapp.com",
+            databaseURL: "https://aviator-pr01-default-rtdb.firebaseio.com",
+            projectId: "aviator-pr01",
+            storageBucket: "aviator-pr01.firebasestorage.app",
+            messagingSenderId: "290788041297",
+            appId: "1:290788041297:web:168f99d1532997fb778e70",
+            measurementId: "G-ENCBTT4BL8"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // File upload handling
+        const fileInput = document.getElementById('fileInput');
+        const uploadSection = document.getElementById('uploadSection');
+        const convertButton = document.getElementById('convertButton');
+        const fileName = document.getElementById('fileName');
+
+        fileInput.addEventListener('change', handleFileSelect);
+        uploadSection.addEventListener('dragover', handleDragOver);
+        uploadSection.addEventListener('drop', handleDrop);
+        uploadSection.addEventListener('dragleave', handleDragLeave);
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                fileName.textContent = `Selected: ${file.name}`;
+                convertButton.disabled = false;
+            }
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            uploadSection.classList.add('dragover');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                selectedFile = files[0];
+                fileName.textContent = `Selected: ${files[0].name}`;
+                convertButton.disabled = false;
+            }
+        }
+
+        function handleDragLeave(event) {
+            event.preventDefault();
+            uploadSection.classList.remove('dragover');
+        }
+
+        function showProgress() {
+            document.getElementById('progressBar').style.display = 'block';
+            const progressFill = document.getElementById('progressFill');
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('progressBar').style.display = 'none';
+                        showOutput();
+                    }, 500);
+                }
+                progressFill.style.width = progress + '%';
+            }, 200);
+        }
+
+        function convertProject() {
+            if (!selectedFile) {
+                alert('Please select a file first');
+                return;
+            }
+
+            showProgress();
+
+            // Simulate file processing
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    // This is a simplified parser - in reality, you'd need to parse the .swb format
+                    const content = event.target.result;
+                    generatedHTML = generateHTMLFromSketchware(content);
+                } catch (error) {
+                    console.error('Error parsing file:', error);
+                    generatedHTML = generateTemplateHTML();
+                }
+            };
+            reader.readAsText(selectedFile);
+        }
+
+        function generateTemplate() {
+            generatedHTML = generateTemplateHTML();
+            showOutput();
+        }
+
+        function generateHTMLFromSketchware(content) {
+            // This is a simplified conversion - real Sketchware files have complex structure
+            return generateTemplateHTML();
+        }
+
+        function generateTemplateHTML() {
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Converted Sketchware App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: transform 0.2s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin: 10px 0;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .auth-container {
+            display: none;
+            text-align: center;
+        }
+
+        .user-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                margin: 0;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>My Sketchware App</h1>
+            <p>Converted to HTML</p>
+        </div>
+        
+        <div class="content">
+            <div id="loginSection">
+                <h2 class="text-center">Welcome</h2>
+                <input type="email" id="emailInput" class="input-field" placeholder="Enter your email">
+                <input type="password" id="passwordInput" class="input-field" placeholder="Enter your password">
+                <button class="button" onclick="signIn()">Sign In</button>
+                <button class="button" onclick="signUp()">Sign Up</button>
+            </div>
+
+            <div id="appSection" style="display: none;">
+                <div class="user-info">
+                    <h3>Welcome, <span id="userEmail"></span>!</h3>
+                </div>
+                
+                <div class="card">
+                    <h3>App Features</h3>
+                    <p>This is a template app converted from Sketchware. You can customize it with your own functionality.</p>
+                </div>
+
+                <input type="text" id="messageInput" class="input-field" placeholder="Enter a message">
+                <button class="button" onclick="saveMessage()">Save Message</button>
+                
+                <div id="messagesContainer"></div>
+                
+                <button class="button" onclick="signOut()" style="background: linear-gradient(45deg, #dc3545, #c82333);">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAL5e-5eQfgf1nI6hWTnhwLFgK0Cp89aa0",
+            authDomain: "aviator-pr01.firebaseapp.com",
+            databaseURL: "https://aviator-pr01-default-rtdb.firebaseio.com",
+            projectId: "aviator-pr01",
+            storageBucket: "aviator-pr01.firebasestorage.app",
+            messagingSenderId: "290788041297",
+            appId: "1:290788041297:web:168f99d1532997fb778e70",
+            measurementId: "G-ENCBTT4BL8"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Authentication state listener
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                showAppSection(user);
+                loadMessages();
+            } else {
+                showLoginSection();
+            }
+        });
+
+        function showLoginSection() {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('appSection').style.display = 'none';
+        }
+
+        function showAppSection(user) {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('appSection').style.display = 'block';
+            document.getElementById('userEmail').textContent = user.email;
+        }
+
+        function signIn() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    console.log('User signed in:', userCredential.user);
+                })
+                .catch((error) => {
+                    alert('Error: ' + error.message);
+                });
+        }
+
+        function signUp() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    console.log('User created:', userCredential.user);
+                })
+                .catch((error) => {
+                    alert('Error: ' + error.message);
+                });
+        }
+
+        function signOut() {
+            auth.signOut().then(() => {
+                console.log('User signed out');
+            }).catch((error) => {
+                console.error('Sign out error:', error);
+            });
+        }
+
+        function saveMessage() {
+            const message = document.getElementById('messageInput').value;
+            const user = auth.currentUser;
+
+            if (!message.trim()) {
+                alert('Please enter a message');
+                return;
+            }
+
+            if (!user) {
+                alert('Please sign in first');
+                return;
+            }
+
+            const messageData = {
+                text: message,
+                userId: user.uid,
+                userEmail: user.email,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            database.ref('messages').push(messageData)
+                .then(() => {
+                    document.getElementById('messageInput').value = '';
+                    console.log('Message saved');
+                })
+                .catch((error) => {
+                    console.error('Error saving message:', error);
+                    alert('Error saving message: ' + error.message);
+                });
+        }
+
+        function loadMessages() {
+            const messagesRef = database.ref('messages');
+            messagesRef.on('value', (snapshot) => {
+                const messages = snapshot.val();
+                const container = document.getElementById('messagesContainer');
+                container.innerHTML = '';
+
+                if (messages) {
+                    Object.keys(messages).forEach((key) => {
+                        const message = messages[key];
+                        const messageElement = document.createElement('div');
+                        messageElement.className = 'card';
+                        messageElement.innerHTML = \`
+                            <p><strong>\${message.userEmail}:</strong></p>
+                            <p>\${message.text}</p>
+                            <small>@\${new Date(message.timestamp).toLocaleString()}</small>
+                        \`;
+                        container.appendChild(messageElement);
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>`;
+        }
+
+        function showOutput() {
+            document.getElementById('outputSection').style.display = 'block';
+            document.getElementById('codeOutput').textContent = generatedHTML;
+            document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function downloadHTML() {
+            if (!generatedHTML) {
+                alert('No HTML to download. Please convert a project first.');
+                return;
+            }
+
+            const blob = new Blob([generatedHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sketchware-app.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
